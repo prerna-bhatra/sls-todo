@@ -1,0 +1,47 @@
+service: todo
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  region: ap-southeast-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:DeleteItem
+      Resource: arn:aws:dynamodb:ap-southeast-1:*:*
+
+resources:
+  Resources:
+    TodosTable:
+      Type: 'AWS::DyanmoDb::Table'
+      DeletePolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttrbuteName: id
+            AttributeType: s
+        KeySchema:
+          -
+            AttrbuteName: id
+            KeyType:  HASH
+        ProvisionedThroughtPut:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: 'todos'
+
+functions:
+  create:
+    handler: src/handler/createTodo.createTodo
+    events:
+      -http: 
+        path: todos
+        method: post
+        cors: true
